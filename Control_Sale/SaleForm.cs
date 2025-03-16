@@ -14,12 +14,16 @@ namespace Control_Sale
         private Button generateReportButton;
         private ListBox salesListBox;
         private Label totalRevenueLabel;
+        private Label totalcountsale;
 
         public SaleForm()
         {
             this.Text = "Управление продажами";
             this.Width = 600;
             this.Height = 500;
+/*            Icon icon = Icon.ExtractAssociatedIcon("\\russia.ico");
+            this.Icon = icon;*/
+            this.BackColor = Color.GhostWhite;
 
             productNameTextBox = new TextBox
             {
@@ -85,6 +89,13 @@ namespace Control_Sale
                 Text = "Общий доход: "
             };
 
+            totalcountsale = new Label
+            {
+                Location = new System.Drawing.Point(220, 280),
+                Width = 200,
+                Text = "Количество продаж: "
+            };
+
             this.Controls.Add(productNameTextBox);
             this.Controls.Add(priceTextBox);
             this.Controls.Add(quantityTextBox);
@@ -94,10 +105,12 @@ namespace Control_Sale
             this.Controls.Add(generateReportButton);
             this.Controls.Add(salesListBox);
             this.Controls.Add(totalRevenueLabel);
+            this.Controls.Add(totalcountsale);
 
             saleManager = new SaleManager();
             UpdateSalesList();
             UpdateTotalRevenue();
+            Updatecountsale();
         }
 
         private void UpdateSalesList()
@@ -112,6 +125,11 @@ namespace Control_Sale
         private void UpdateTotalRevenue()
         {
             totalRevenueLabel.Text = $"Общий доход: {saleManager.TotalRevenue} руб.";
+        }
+
+        private void Updatecountsale()
+        {
+            totalcountsale.Text = $"Количество продаж: {saleManager.Totalcountsale}.";
         }
 
         private void AddSaleButton_Click(object sender, EventArgs e)
@@ -130,6 +148,11 @@ namespace Control_Sale
                 MessageBox.Show("Неверный формат цены или количества!");
                 return;
             }
+            if (decimal.Parse(priceTextBox.Text) <= 0 || int.Parse(quantityTextBox.Text) <= 0)
+            {
+                MessageBox.Show("Цена или количество должны быть больше 0!");
+                return;
+            }
             DateTime date = datePicker.Value;
             Sale newSale = new Sale(productNameTextBox.Text, price, quantity, date);
             try
@@ -140,6 +163,7 @@ namespace Control_Sale
                 quantityTextBox.Clear();
                 UpdateSalesList();
                 UpdateTotalRevenue();
+                Updatecountsale();
             }
             catch (Exception ex)
             {
@@ -162,8 +186,7 @@ namespace Control_Sale
                 decimal price;
                 if (decimal.TryParse(parts[1].Trim().Split(' ')[0], out price))
                 {
-                    var saleToRemove = saleManager.Sales.Find(s => s.ProductName ==
-    productName && s.Price == price);
+                    var saleToRemove = saleManager.Sales.Find(s => s.ProductName == productName && s.Price == price);
                     if (saleToRemove != null)
                     {
                         try
@@ -171,6 +194,7 @@ namespace Control_Sale
                             saleManager.RemoveSale(saleToRemove);
                             UpdateSalesList();
                             UpdateTotalRevenue();
+                            Updatecountsale();
                         }
                         catch (Exception ex)
                         {
@@ -191,7 +215,7 @@ namespace Control_Sale
             string report = "Отчёт по продажам:\n";
             foreach (var sale in saleManager.Sales)
             {
-                report += $"Продукт: {sale.ProductName}\nЦена: {sale.Price} руб.\nКоличество: {sale.Quantity}\nДата: {sale.Date.ToString("yyyy-MM-dd")}\nОбщий доход: {sale.TotalRevenue}руб.\n\n";
+                report += $"Продукт: {sale.ProductName}\nЦена: {sale.Price} руб.\nКоличество: {sale.Quantity}\nДата: {sale.Date.ToString("yyyy-MM-dd")}\nОбщий доход: {sale.TotalRevenue}руб.\nКоличество продаж: {saleManager.Sales.Count}\n\n";
             }
             report += $"Итого: {saleManager.TotalRevenue} руб.";
             File.WriteAllText("sales_report.txt", report);

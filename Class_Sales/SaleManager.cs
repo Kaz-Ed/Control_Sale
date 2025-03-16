@@ -1,26 +1,11 @@
-﻿namespace Class_Sales
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Class_Sales
 {
-    public class Sale
-    {
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public DateTime Date { get; set; }
-
-        public Sale(string productName, decimal price, int quantity, DateTime date)
-        {
-            ProductName = productName;
-            Price = price;
-            Quantity = quantity;
-            Date = date;
-        }
-
-        public decimal TotalRevenue
-        {
-            get { return Price * Quantity; }
-        }
-    }
-
     public class SaleManager
     {
         public List<Sale> Sales { get; private set; }
@@ -56,10 +41,14 @@
             get { return Sales.Sum(s => s.TotalRevenue); }
         }
 
+        public int Totalcountsale
+        {
+            get { return Sales.Count; }
+        }
+
         private void SaveSales()
         {
-            File.WriteAllLines("sales.txt", Sales.Select(s =>
-    $"{s.ProductName}|{s.Price}|{s.Quantity}|{s.Date.ToString("yyyy-MM-dd HH:mm:ss")}"));
+            File.WriteAllLines("sales.txt", Sales.Select(s => $"{s.ProductName}|{s.Price}|{s.Quantity}|{s.Date.ToString("yyyy-MM-dd HH:mm:ss")}"));
         }
 
         private void LoadSales()
@@ -75,8 +64,7 @@
                         decimal price;
                         int quantity;
                         DateTime date;
-                        if (decimal.TryParse(parts[1], out price) && int.TryParse(parts[2], out quantity)
-    && DateTime.TryParse(parts[3], out date))
+                        if (decimal.TryParse(parts[1], out price) && int.TryParse(parts[2], out quantity) && DateTime.TryParse(parts[3], out date))
                         {
                             Sales.Add(new Sale(parts[0], price, quantity, date));
                         }
